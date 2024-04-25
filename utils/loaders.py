@@ -7,6 +7,31 @@ from PIL import Image
 import os
 import os.path
 from utils.logger import logger
+import numpy as np
+
+def random_clip(video_frames, sampling_rate, frames_per_clip):
+    # credits: https://github.com/IBM/action-recognition-pytorch/blob/master/utils/video_dataset.py - Deep Analysis of CNN-based Spatio-temporal Representations for Action Recognition (https://arxiv.org/abs/2010.11757v4)
+    """
+
+    Args:
+        video_frames (int): total frame number of a video
+        sampling_rate (int): sampling rate for clip, pick one every k frames
+        frames_per_clip (int): number of frames of a clip
+
+    Returns:
+        list[int]: frame indices (started from zero)
+    """
+    # cumpute the the maximum starting frame of a clip
+    highest_idx = video_frames - sampling_rate * frames_per_clip
+    # if video_frame is lower than sampling_rate * frames_per_clip, random_offset is set ot 0
+    if highest_idx <= 0:
+        random_offset = 0
+    # if video_frame is higher than sampling_rate * frames_peer_clip, random_offset is set to a random integer betwee 0 and highest_idx
+    else:
+        random_offset = int(np.random.randint(0, highest_idx, 1))
+    # a list of indexes is filled with the number of frames selected for the clip, based on random_offset and sampling_rate
+    frame_idx = [int(random_offset + i * sampling_rate) % video_frames for i in range(frames_per_clip)]
+    return frame_idx
 
 class EpicKitchensDataset(data.Dataset, ABC):
     def __init__(self, split, modalities, mode, dataset_conf, num_frames_per_clip, num_clips, dense_sampling,
@@ -85,7 +110,37 @@ class EpicKitchensDataset(data.Dataset, ABC):
         # Remember that the returned array should have size              #
         #           num_clip x num_frames_per_clip                       #
         ##################################################################
-        raise NotImplementedError("You should implement _get_val_indices")
+        #raise NotImplementedError("You should implement _get_val_indices")
+        # credits: https://github.com/IBM/action-recognition-pytorch/blob/master/utils/video_dataset.py - Deep Analysis of CNN-based Spatio-temporal Representations for Action Recognition (https://arxiv.org/abs/2010.11757v4)
+        max_frame_idx = max(1, record.num_frames[modality])
+        if self.dense_sampling[modality]:
+            frame_idx = []
+            for i in range(self.num_clips):
+                frame_idx.extend(random_clip(max_frame_idx, self.num_clips, self.num_frames_per_clip[modality]))
+        else:  # uniform sampling
+            frame_idices = []
+            for i in range(self.num_clips):
+                total_frames = self.num_clips * self.num_frames_per_clip
+                ave_frames_per_group = max_frame_idx // self.num_frames_per_clip
+                if ave_frames_per_group >= self.num_frames_per_clip:
+                    # randomly sample f images per segment
+                    frame_idx = np.arange(0, self.num_clips) * ave_frames_per_group
+                    frame_idx = np.repeat(frame_idx, repeats=self.num_frames_per_clip)
+                    offsets = np.random.choice(ave_frames_per_group, self.num_frames_per_clip, replace=False)
+                    offsets = np.tile(offsets, self.num_clips)
+                    frame_idx = frame_idx + offsets
+                elif max_frame_idx < total_frames:
+                    # need to sample the same images
+                    np.random.seed(i)
+                    frame_idx = np.random.choice(max_frame_idx, total_frames)
+                else:
+                    # sample cross all images
+                    np.random.seed(i)
+                    frame_idx = np.random.choice(max_frame_idx, total_frames, replace=False)
+                frame_idx = np.sort(frame_idx)
+                frame_idices.extend(frame_idx.tolist())
+        return frame_idx
+
 
     def __getitem__(self, index):
 
