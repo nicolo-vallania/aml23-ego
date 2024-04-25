@@ -120,13 +120,13 @@ class EpicKitchensDataset(data.Dataset, ABC):
         else:  # uniform sampling
             frame_idices = []
             for i in range(self.num_clips):
-                total_frames = self.num_clips * self.num_frames_per_clip
-                ave_frames_per_group = max_frame_idx // self.num_frames_per_clip
-                if ave_frames_per_group >= self.num_frames_per_clip:
+                total_frames = self.num_clips * self.num_frames_per_clip[modality]
+                ave_frames_per_group = max_frame_idx // self.num_frames_per_clip[modality]
+                if ave_frames_per_group >= self.num_frames_per_clip[modality]:
                     # randomly sample f images per segment
                     frame_idx = np.arange(0, self.num_clips) * ave_frames_per_group
-                    frame_idx = np.repeat(frame_idx, repeats=self.num_frames_per_clip)
-                    offsets = np.random.choice(ave_frames_per_group, self.num_frames_per_clip, replace=False)
+                    frame_idx = np.repeat(frame_idx, repeats=self.num_frames_per_clip[modality])
+                    offsets = np.random.choice(ave_frames_per_group, self.num_frames_per_clip[modality], replace=False)
                     offsets = np.tile(offsets, self.num_clips)
                     frame_idx = frame_idx + offsets
                 elif max_frame_idx < total_frames:
