@@ -66,13 +66,13 @@ def apply_pca(features, plot_3d=False):
     """
     PCA analysis
     """
-    pca = PCA(3 if plot_3d else 2)
-    reduced_features = np.mean([x['features_RGB'] for x in features], 1)
-    reduced_features = pca.fit_transform(reduced_features)
+    pca = PCA(400)
+    numpy_features = np.mean([x['features_RGB'] for x in features], 1)
+    reduced_features = pca.fit_transform(numpy_features)
     
     # if not 3d third dimension = 0
     if not plot_3d:
-        reduced_features = np.hstack((reduced_features, np.zeros((reduced_features.shape[0], 1))))
+        numpy_features = np.hstack((numpy_features, np.zeros((numpy_features.shape[0], 1))))
     
     return reduced_features
 
@@ -84,19 +84,22 @@ def cluster_and_plot(reduced_features, central_frames, split_data, label_actions
     km.fit(reduced_features)
     km.predict(reduced_features)
     centroids = km.cluster_centers_
+    print("Centr: ",centroids.shape)
     c_labels = km.labels_
+    print("Clabels:", len(c_labels))
 
     # cluster label for centroids
     centroid_labels = []
     for centroid in centroids:
         distances = np.linalg.norm(reduced_features - centroid, axis=1)
+        print("Distance:", distances.shape)
         closest_index = np.argmin(distances)
         centroid_label = c_labels[closest_index]
         centroid_labels.append(centroid_label)
 
     # extracting labels
     labels = split_data['verb_class'] #id - numerical label
-     
+    
     actions = [label_actions[label] for label in labels] # list of actions
 
     fig = plt.figure(figsize=(8, 8))
@@ -109,23 +112,14 @@ def cluster_and_plot(reduced_features, central_frames, split_data, label_actions
         label_colors[action] = colors(i)
 
     # plotting scatter
-    for i, (x, y, z) in enumerate(reduced_features):
-        action = actions[i]
-        ax.scatter(x, y, c=label_colors[action], label=action, s=100, zorder=1)
-        ax.plot([x], [y], [z], marker='o', markersize=5, color=label_colors[action], alpha=1, zorder=1)
-
-    # plotting centroids
-    for i, centroid in enumerate(centroids):
-        action = label_actions[i]
-        print(action)
-        print(centroid)
-        ax.scatter(centroid[0], centroid[1], color=label_colors[action], marker='^', s=300, edgecolors='black', linewidths=2, alpha=1, zorder=3)
-        ax.plot([centroid[0]], [centroid[1]], color=label_colors[action], markersize=10, zorder=3)
-        ax.text(centroid[0], centroid[1], action, color='black', fontsize=12, zorder=3) #text to be deleted
-
-    # legend colors
-    legend_patches = [matplotlib.patches.Patch(color=color, label=label) for label, color in label_colors.items()]
-    ax.legend(handles=legend_patches)
+    for i, action in enumerate(unique_actions):
+        idxs = np.where(c_labels==i)
+        if not plot_3d:
+            ax.scatter(reduced_features[idxs, 0], reduced_features[idxs, 1], c=label_colors[action], label=action, s=100, zorder=1)
+            ax.scatter(centroids[i, 0], centroids[i, 1], marker="^", s=300, color=label_colors[action], edgecolors='black', linewidths=2, zorder=3)
+        else:
+            ax.scatter(reduced_features[idxs, 0], reduced_features[idxs, 1], reduced_features[idxs, 2], c=label_colors[action], label=action, s=100, zorder=1)
+            ax.scatter(centroids[i, 0], centroids[i, 1], centroids[i, 2], marker="^", s=300, color=label_colors[action], edgecolors='black', linewidths=2, zorder=3)
 
     plt.savefig(output_image_path, dpi=300)
     plt.show()
