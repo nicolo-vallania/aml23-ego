@@ -67,12 +67,12 @@ def apply_pca(features, plot_3d=False):
     PCA analysis
     """
     pca = PCA(400)
-    numpy_features = np.mean([x['features_RGB'] for x in features], 1)
-    reduced_features = pca.fit_transform(numpy_features)
-    
+    numpy_features = np.mean([x['features_RGB'] for x in features], 1)    
+
     # if not 3d third dimension = 0
     if not plot_3d:
         numpy_features = np.hstack((numpy_features, np.zeros((numpy_features.shape[0], 1))))
+    reduced_features = pca.fit_transform(numpy_features)
     
     return reduced_features
 
