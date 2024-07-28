@@ -3,7 +3,7 @@ from torch import nn
 
 class Classifier(nn.Module):
     # GRU
-    def __init__(self, input_dim=1024, hidden_dim=512, output_dim=8, n_layers=2, drop_prob=0.2):
+    def __init__(self, input_dim=1024, hidden_dim=512, output_dim=8, n_layers=2, drop_prob=0.5):
         super(Classifier, self).__init__()
         self.hidden_dim = hidden_dim
         self.n_layers = n_layers
