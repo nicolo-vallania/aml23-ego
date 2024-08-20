@@ -33,15 +33,15 @@ class LSTM_RGB(nn.Module):
         if x.dim() == 2:
             x = x.unsqueeze(2)
 
-        x = x.permute(2, 0, 1)
+        x = x.permute(0, 2, 1)
 
         hidden_state = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
         cell_state = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
 
         
-        out, (hidden, cell) = self.lstm(x, (hidden_state, cell_state))
+        #out, (hidden, cell) = self.lstm(x, (hidden_state, cell_state))
         # to be reviewed
-        #out, _ = self.lstm(x) 
+        out, _ = self.lstm(x) 
 
         out = self.dropout(out[:, -1, :])
         out = self.relu(out)
