@@ -15,9 +15,9 @@ train:
   eval_freq: 50 # evaluation frequency
   num_clips: 1 # clips adopted in training
   dense_sampling: # sampling version adopted in training for each modality
-    RGB: False
+    RGB: ???
   num_frames_per_clip: # number of frames adopted in training for each modality
-    RGB: 25
+    RGB: ???
 
 test:
   num_clips: 5 # number of clips in testing
