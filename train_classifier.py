@@ -56,7 +56,9 @@ def main():
         logger.info('{} Net\tModality: {}'.format(args.models[m].model, m))
         # notice that here, the first parameter passed is the input dimension
         # In our case it represents the feature dimensionality which is equivalent to 1024 for I3D
-        models[m] = getattr(model_list, args.models[m].model)()
+        models[m] = getattr(model_list, args.models[m].model)(dropout=args.models[m].dropout,
+                                                              n_layers=args.models[m].n_layers,
+                                                              num_classes=args.dataset.num_classes)
 
     # the models are wrapped into the ActionRecognition task which manages all the training steps
     action_classifier = tasks.ActionRecognition("action-classifier", models, args.batch_size,
@@ -145,6 +147,10 @@ def train(action_classifier, train_loader, val_loader, device, num_classes):
         ''' Action recognition'''
         source_label = source_label.to(device)
         data = {}
+
+        # pooling layer to aggregate data before feeding the classifier
+        pool = torch.nn.AvgPool2d(kernel_size=(3, 1))
+        source_data['RGB'] = pool(source_data['RGB'])
 
         for clip in range(args.train.num_clips):
             # in case of multi-clip training one clip per time is processed
