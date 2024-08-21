@@ -35,7 +35,7 @@ dataset:
   RGB:
     data_path: ../saved_features # path to RGB data
     tmpl: "img_{:010d}.jpg" # format of RGB filenames
-    features_name: dense_25 #test_feat_kinetics
+    features_name: ??? #test_feat_kinetics
   Event: # not neeeded for the project
     rgb4e: 6
 
@@ -47,6 +47,7 @@ models:
     kwargs: {
       num_classes: 8
     }
+    dropout: ???
     lr_steps: 3000
     lr: 0.01
     sgd_momentum: 0.9
