@@ -2,9 +2,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-
+#unused params
 class MLP(nn.Module):
-    def __init__(self, input_size=1024, hidden_size1=512, hidden_size2=256, output_size=8):
+    def __init__(self, dropout, n_layers, input_size=1024, hidden_size1=512, hidden_size2=256, output_size=8):
         super(MLP, self).__init__()
         # fully connected
         self.fc1 = nn.Linear(input_size, hidden_size1)
