@@ -17,7 +17,7 @@ class GRU_RGB(nn.Module):
         self.hidden = self.init_hidden(32)
         
     def forward(self, x):
-        self.hidden = torch.zeros((2, x.size(0), self.hidden_dim)).to(self.device)
+        self.hidden = torch.zeros((self.n_layers, x.size(0), self.hidden_dim)).to(self.device)
         sample = x.unsqueeze(1)
         out, self.hidden = self.gru(sample, self.hidden)
         out = self.fc(self.relu(out[:,-1]))
