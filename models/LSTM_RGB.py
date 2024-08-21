@@ -7,10 +7,10 @@ class LSTM_RGB(nn.Module):
 
     def __init__(
         self,
+        n_layers,
+        dropout,
         input_size = 1024,
         hidden_size = 512,
-        n_layers = 2,
-        dropout = 0.33,
         num_classes = 8
     ):
         super(LSTM_RGB, self).__init__()
