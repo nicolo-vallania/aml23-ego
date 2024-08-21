@@ -57,8 +57,8 @@ def main():
         # notice that here, the first parameter passed is the input dimension
         # In our case it represents the feature dimensionality which is equivalent to 1024 for I3D
         models[m] = getattr(model_list, args.models[m].model)(dropout=args.models[m].dropout,
-                                                              n_layers=args.models[m].n_layers,
-                                                              #num_classes=args.dataset.num_classes
+                                                              n_layers=args.models[m].n_layers
+                                                              #, num_classes=args.dataset.num_classes
                                                              )
 
     # the models are wrapped into the ActionRecognition task which manages all the training steps
