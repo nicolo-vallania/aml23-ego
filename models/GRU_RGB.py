@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 class GRU_RGB(nn.Module):
     # GRU for RGB
-    def __init__(self, input_dim=1024, hidden_dim=512, output_dim=8, n_layers=2, dropout=0.5):
+    def __init__(self,  n_layers, dropout, input_dim=1024, hidden_dim=512, output_dim=8):
         super(GRU_RGB, self).__init__()
         self.hidden_dim = hidden_dim
         self.n_layers = n_layers
